@@ -1562,7 +1562,10 @@
             }
 
             editor.style.display = 'flex';
-            setTimeout(() => editor.classList.add('active'), 10);
+            setTimeout(() => {
+                editor.classList.add('active');
+                titleInput.focus();
+            }, 10);
         }
 
         function closeNoteEditor() {
@@ -1675,7 +1678,20 @@
 
                 setupVisualizer(stream);
             } catch (err) {
-                alert('Microphone access denied or not supported. Please enable permissions in settings.');
+                console.error('Microphone error:', err);
+                alert('Microphone access denied or not supported. Please enable permissions in settings to use the recorder.');
+            }
+        }
+
+        async function requestInitialPermissions() {
+            try {
+                // Request microphone permission on startup to ensure recorder works
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Stop the stream immediately after permission is granted
+                stream.getTracks().forEach(track => track.stop());
+                console.log('Microphone permission granted');
+            } catch (err) {
+                console.warn('Initial microphone permission request failed or denied:', err);
             }
         }
 
@@ -1950,6 +1966,9 @@
         // Initialize Calendar
         renderCalendar();
         selectDate(new Date().getDate());
+
+        // Request permissions on startup
+        requestInitialPermissions();
     </script>
 </body>
 </html>
