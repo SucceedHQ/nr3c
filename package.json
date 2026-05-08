@@ -1,0 +1,16 @@
+{
+  "name": "shqvive",
+  "version": "1.0.0",
+  "description": "SHQvive Premium Utility Suite",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step needed for vanilla HTML'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
