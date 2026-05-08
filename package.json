@@ -1,7 +1,7 @@
 {
-  "name": "shqvive",
+  "name": "notime",
   "version": "1.0.0",
-  "description": "SHQvive Premium Utility Suite",
+  "description": "Notime Premium Utility Suite",
   "main": "index.html",
   "scripts": {
     "build": "echo 'No build step needed for vanilla HTML'"

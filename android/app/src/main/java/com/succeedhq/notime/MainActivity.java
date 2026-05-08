@@ -1,4 +1,4 @@
-package com.succeedhq.shqvive;
+package com.succeedhq.notime;
 
 import com.getcapacitor.BridgeActivity;
 

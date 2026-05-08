@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#ffffff">
-    <title>SHQvive - Premium Utility Suite</title>
+    <title>Notime - Premium Utility Suite</title>
     <!-- Google Fonts for a premium look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1564,6 +1564,13 @@
             editor.style.display = 'flex';
             setTimeout(() => {
                 editor.classList.add('active');
+                
+                // Add placeholder behavior: disappear on focus
+                [titleInput, bodyInput].forEach(el => {
+                    el.onfocus = function() { this.dataset.placeholder = this.placeholder; this.placeholder = ''; };
+                    el.onblur = function() { if (this.dataset.placeholder) this.placeholder = this.dataset.placeholder; };
+                });
+                
                 titleInput.focus();
             }, 10);
         }
