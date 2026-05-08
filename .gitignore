@@ -1,0 +1,10 @@
+node_modules/
+www/
+android/app/build/
+android/app/release/
+android/app/debug/
+*.log
+.DS_Store
+.idea/
+.vscode/
+capacitor-cordova-android-plugins/
