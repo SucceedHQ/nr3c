@@ -330,9 +330,47 @@
 
         .timer-input-label {
             font-size: 10px;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .calc-history {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f8f8;
+            border-radius: 16px;
+        }
+
+        .calc-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calc-history-title {
+            font-size: 13px;
+            font-weight: 600;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calc-history-select {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 13px;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            max-width: 180px;
+            text-overflow: ellipsis;
+        }
+
+        .calc-history-select:focus {
+            border-color: var(--active-tab);
         }
 
         /* Calculator Specific Styles */
@@ -979,20 +1017,25 @@
     <div id="app">
         <header>
             <div class="app-logo">
-                <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="200" height="200" rx="48" fill="#1a1a1a"/>
-                    <circle cx="100" cy="100" r="66" fill="none" stroke="white" stroke-width="2.5" opacity="0.85"/>
-                    <line x1="100" y1="34" x2="100" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="162.8" y1="79.4" x2="152.4" y2="82.6" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="140.6" y1="153.4" x2="134.9" y2="145.6" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="59.4" y1="153.4" x2="65.1" y2="145.6" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="37.2" y1="79.4" x2="47.6" y2="82.6" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="100" y1="100" x2="148" y2="71" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="100" y1="100" x2="67" y2="77" stroke="white" stroke-width="5" stroke-linecap="round"/>
-                    <circle cx="100" cy="100" r="5" fill="white"/>
+                <svg width="60" height="60" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" rx="46" fill="#1a1a1a"/>
+                    <circle cx="100" cy="100" r="64" fill="none" stroke="white" stroke-width="2.5"/>
+                    <line x1="100" y1="36" x2="100" y2="50" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="164" y1="100" x2="150" y2="100" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="100" y1="164" x2="100" y2="150" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="36" y1="100" x2="50" y2="100" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="132" y1="43.7" x2="127.2" y2="52" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="156.3" y1="68" x2="147.8" y2="72.8" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="156.3" y1="132" x2="147.8" y2="127.2" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="132" y1="156.3" x2="127.2" y2="148" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="68" y1="156.3" x2="72.8" y2="148" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="43.7" y1="132" x2="52.2" y2="127.2" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="43.7" y1="68" x2="52.2" y2="72.8" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <line x1="68" y1="43.7" x2="72.8" y2="52" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                    <circle cx="100" cy="100" r="10" fill="none" stroke="white" stroke-width="3.5"/>
                 </svg>
             </div>
-            <h1 id="header-title">Clock</h1>
+            <h1 id="header-title" style="font-size: 26px; letter-spacing: -1px;">Notime</h1>
         </header>
 
         <main>
@@ -1131,8 +1174,12 @@
                     </div>
 
                     <div class="calc-history">
-                        <div class="calc-history-title">History</div>
-                        <div id="calc-history-list"></div>
+                        <div class="calc-history-header">
+                            <div class="calc-history-title">History</div>
+                            <select id="calc-history-dropdown" class="calc-history-select" onchange="restoreHistory(this.value)">
+                                <option value="" disabled selected>Select past calculation</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1362,7 +1409,7 @@
         let calcPreviousInput = '';
         let calcOperatorValue = null;
         let calcExpression = '';
-        let calcHistory = [];
+        let calcHistory = JSON.parse(localStorage.getItem('calc_history')) || [];
         let calcWaitingForNewNumber = false;
 
         function calcUpdateDisplay() {
@@ -1491,22 +1538,35 @@
         function addToHistory(exp, res) {
             if (res === 'Error') return;
             calcHistory.unshift({ exp, res });
-            if (calcHistory.length > 10) calcHistory.pop();
+            if (calcHistory.length > 30) calcHistory.pop();
             
-            const listEl = document.getElementById('calc-history-list');
-            listEl.innerHTML = calcHistory.map((item, index) => `
-                <div class="history-item" onclick="restoreHistory(${index})">
-                    <div class="history-exp">${item.exp}</div>
-                    <div class="history-res">${item.res}</div>
-                </div>
-            `).join('');
+            localStorage.setItem('calc_history', JSON.stringify(calcHistory));
+            renderCalcHistory();
+        }
+
+        function renderCalcHistory() {
+            const dropdown = document.getElementById('calc-history-dropdown');
+            if (!dropdown) return;
+            
+            const options = calcHistory.map((item, index) => 
+                `<option value="${index}">${item.exp} ${item.res}</option>`
+            ).join('');
+            
+            dropdown.innerHTML = `<option value="" disabled selected>${calcHistory.length > 0 ? 'Select past calculation' : 'No history'}</option>` + options;
         }
 
         function restoreHistory(index) {
+            if (index === "" || index === null) return;
             calcCurrentInput = calcHistory[index].res.toString();
             calcWaitingForNewNumber = true;
             calcUpdateDisplay();
+            
+            // Reset dropdown
+            document.getElementById('calc-history-dropdown').value = "";
         }
+
+        // Initial render
+        renderCalcHistory();
 
         // Notes Logic
         let notes = JSON.parse(localStorage.getItem('app_notes')) || [];
