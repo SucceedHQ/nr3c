@@ -1,0 +1,178 @@
+
+<style>
+  .phone { background: #f5f5f3; border-radius: 16px; padding: 12px; display: inline-block; width: 100%; box-sizing: border-box; }
+  .screen { background: #fff; border-radius: 12px; border: 0.5px solid #ddd; overflow: hidden; font-family: system-ui, sans-serif; }
+  .status-bar { background: #fff; padding: 8px 16px 4px; display: flex; justify-content: space-between; font-size: 11px; color: #888; border-bottom: 0.5px solid #eee; }
+  .screen-content { padding: 20px 16px 0; min-height: 320px; }
+  .screen-title { font-size: 22px; font-weight: 500; color: #1a1a1a; margin: 0 0 20px; }
+  .nav-bar { display: flex; border-top: 0.5px solid #eee; background: #fff; padding: 8px 0 4px; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: #aaa; cursor: pointer; }
+  .nav-item.active { color: #1a1a1a; }
+  .nav-item i { font-size: 20px; }
+  .nav-label { font-size: 10px; }
+
+  .clock-face { text-align: center; padding: 16px 0; }
+  .clock-time { font-size: 52px; font-weight: 300; color: #1a1a1a; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .clock-date { font-size: 14px; color: #888; margin-top: 4px; }
+  .clock-btns { display: flex; gap: 10px; margin-top: 24px; }
+  .clock-btn { flex: 1; padding: 12px; border-radius: 10px; border: 0.5px solid #ddd; background: #fff; font-size: 13px; color: #1a1a1a; text-align: center; }
+
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-month { font-size: 16px; font-weight: 500; color: #1a1a1a; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .cal-day-label { font-size: 11px; color: #aaa; padding: 4px 0; }
+  .cal-day { font-size: 13px; color: #1a1a1a; padding: 6px 2px; border-radius: 6px; }
+  .cal-day.today { background: #1a1a1a; color: #fff; font-weight: 500; }
+  .cal-day.has-event { position: relative; }
+  .cal-day.muted { color: #ccc; }
+  .dot { width: 4px; height: 4px; background: #1a1a1a; border-radius: 50%; margin: 0 auto; }
+
+  .note-item { padding: 12px; border-radius: 10px; background: #f9f9f8; border: 0.5px solid #eee; margin-bottom: 10px; }
+  .note-title { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 3px; }
+  .note-preview { font-size: 12px; color: #aaa; }
+
+  .calc-display { background: #f9f9f8; border-radius: 10px; padding: 16px; text-align: right; margin-bottom: 12px; border: 0.5px solid #eee; }
+  .calc-expr { font-size: 13px; color: #aaa; min-height: 18px; }
+  .calc-result { font-size: 36px; font-weight: 300; color: #1a1a1a; letter-spacing: -1px; }
+  .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .calc-key { padding: 14px 0; border-radius: 10px; text-align: center; font-size: 16px; color: #1a1a1a; background: #f9f9f8; border: 0.5px solid #eee; }
+  .calc-key.op { background: #1a1a1a; color: #fff; }
+  .calc-key.wide { grid-column: span 2; }
+
+  .rec-center { text-align: center; padding: 20px 0; }
+  .rec-btn { width: 72px; height: 72px; border-radius: 50%; background: #f9f9f8; border: 0.5px solid #ddd; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .rec-btn i { font-size: 28px; color: #1a1a1a; }
+  .rec-label { font-size: 14px; color: #888; }
+  .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 48px; margin: 16px 0; }
+  .waveform-bar { width: 3px; border-radius: 2px; background: #ddd; }
+
+  .section-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .fab { width: 44px; height: 44px; border-radius: 50%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; float: right; }
+  .fab i { font-size: 20px; color: #fff; }
+</style>
+
+<div style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; padding: 4px 0;">
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status-bar"><span>9:41</span><span>••• WiFi</span></div>
+      <div class="screen-content">
+        <p class="screen-title">Clock</p>
+        <div class="clock-face">
+          <div class="clock-time">09:41</div>
+          <div class="clock-date">Friday, May 8</div>
+        </div>
+        <div class="clock-btns">
+          <div class="clock-btn">Stopwatch</div>
+          <div class="clock-btn">Timer</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item active"><i class="ti ti-clock"></i><span class="nav-label">Clock</span></div>
+        <div class="nav-item"><i class="ti ti-calendar"></i><span class="nav-label">Calendar</span></div>
+        <div class="nav-item"><i class="ti ti-notes"></i><span class="nav-label">Notes</span></div>
+        <div class="nav-item"><i class="ti ti-calculator"></i><span class="nav-label">Calc</span></div>
+        <div class="nav-item"><i class="ti ti-microphone"></i><span class="nav-label">Record</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status-bar"><span>9:41</span><span>••• WiFi</span></div>
+      <div class="screen-content">
+        <p class="screen-title">Calendar</p>
+        <div class="cal-header">
+          <span class="cal-month">May 2026</span>
+          <span style="font-size:18px; color:#aaa;">&#8250;</span>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-day-label">S</div><div class="cal-day-label">M</div><div class="cal-day-label">T</div><div class="cal-day-label">W</div><div class="cal-day-label">T</div><div class="cal-day-label">F</div><div class="cal-day-label">S</div>
+          <div class="cal-day muted">27</div><div class="cal-day muted">28</div><div class="cal-day muted">29</div><div class="cal-day muted">30</div><div class="cal-day">1</div><div class="cal-day">2</div><div class="cal-day">3</div>
+          <div class="cal-day">4</div><div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day today">8</div><div class="cal-day">9</div><div class="cal-day">10</div>
+          <div class="cal-day">11</div><div class="cal-day has-event">12<div class="dot"></div></div><div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div><div class="cal-day">16</div><div class="cal-day">17</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><i class="ti ti-clock"></i><span class="nav-label">Clock</span></div>
+        <div class="nav-item active"><i class="ti ti-calendar"></i><span class="nav-label">Calendar</span></div>
+        <div class="nav-item"><i class="ti ti-notes"></i><span class="nav-label">Notes</span></div>
+        <div class="nav-item"><i class="ti ti-calculator"></i><span class="nav-label">Calc</span></div>
+        <div class="nav-item"><i class="ti ti-microphone"></i><span class="nav-label">Record</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status-bar"><span>9:41</span><span>••• WiFi</span></div>
+      <div class="screen-content">
+        <p class="screen-title">Notes <span style="float:right"><div class="fab"><i class="ti ti-plus"></i></div></span></p>
+        <div class="section-label">Recent</div>
+        <div class="note-item"><div class="note-title">Meeting agenda</div><div class="note-preview">Discuss Q2 targets, review...</div></div>
+        <div class="note-item"><div class="note-title">Shopping list</div><div class="note-preview">Milk, eggs, bread, tomatoes</div></div>
+        <div class="note-item"><div class="note-title">App ideas</div><div class="note-preview">Clock + calendar combo...</div></div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><i class="ti ti-clock"></i><span class="nav-label">Clock</span></div>
+        <div class="nav-item"><i class="ti ti-calendar"></i><span class="nav-label">Calendar</span></div>
+        <div class="nav-item active"><i class="ti ti-notes"></i><span class="nav-label">Notes</span></div>
+        <div class="nav-item"><i class="ti ti-calculator"></i><span class="nav-label">Calc</span></div>
+        <div class="nav-item"><i class="ti ti-microphone"></i><span class="nav-label">Record</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status-bar"><span>9:41</span><span>••• WiFi</span></div>
+      <div class="screen-content">
+        <p class="screen-title">Calculator</p>
+        <div class="calc-display">
+          <div class="calc-expr">128 + 37 =</div>
+          <div class="calc-result">165</div>
+        </div>
+        <div class="calc-grid">
+          <div class="calc-key">C</div><div class="calc-key">+/-</div><div class="calc-key">%</div><div class="calc-key op">÷</div>
+          <div class="calc-key">7</div><div class="calc-key">8</div><div class="calc-key">9</div><div class="calc-key op">×</div>
+          <div class="calc-key">4</div><div class="calc-key">5</div><div class="calc-key">6</div><div class="calc-key op">−</div>
+          <div class="calc-key">1</div><div class="calc-key">2</div><div class="calc-key">3</div><div class="calc-key op">+</div>
+          <div class="calc-key wide">0</div><div class="calc-key">.</div><div class="calc-key op">=</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><i class="ti ti-clock"></i><span class="nav-label">Clock</span></div>
+        <div class="nav-item"><i class="ti ti-calendar"></i><span class="nav-label">Calendar</span></div>
+        <div class="nav-item"><i class="ti ti-notes"></i><span class="nav-label">Notes</span></div>
+        <div class="nav-item active"><i class="ti ti-calculator"></i><span class="nav-label">Calc</span></div>
+        <div class="nav-item"><i class="ti ti-microphone"></i><span class="nav-label">Record</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phone" style="grid-column: span 2; max-width: 200px; margin: 0 auto;">
+    <div class="screen">
+      <div class="status-bar"><span>9:41</span><span>••• WiFi</span></div>
+      <div class="screen-content">
+        <p class="screen-title">Recorder</p>
+        <div class="rec-center">
+          <div class="rec-btn"><i class="ti ti-microphone"></i></div>
+          <div class="rec-label">Tap to record</div>
+          <div class="waveform">
+            <div class="waveform-bar" style="height:12px"></div><div class="waveform-bar" style="height:28px"></div><div class="waveform-bar" style="height:20px"></div><div class="waveform-bar" style="height:36px"></div><div class="waveform-bar" style="height:18px"></div><div class="waveform-bar" style="height:30px"></div><div class="waveform-bar" style="height:14px"></div><div class="waveform-bar" style="height:24px"></div><div class="waveform-bar" style="height:32px"></div><div class="waveform-bar" style="height:16px"></div>
+          </div>
+        </div>
+        <div class="section-label">Saved recordings</div>
+        <div class="note-item"><div class="note-title">Recording — May 8</div><div class="note-preview">0:42 · Tap to play</div></div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item"><i class="ti ti-clock"></i><span class="nav-label">Clock</span></div>
+        <div class="nav-item"><i class="ti ti-calendar"></i><span class="nav-label">Calendar</span></div>
+        <div class="nav-item"><i class="ti ti-notes"></i><span class="nav-label">Notes</span></div>
+        <div class="nav-item"><i class="ti ti-calculator"></i><span class="nav-label">Calc</span></div>
+        <div class="nav-item active"><i class="ti ti-microphone"></i><span class="nav-label">Record</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>

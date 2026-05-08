@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+    <title>Minimal Utility App</title>
+    <!-- Google Fonts for a premium look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8f9fa;
+            --app-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #8e8e93;
+            --active-tab: #000000;
+            --inactive-tab: #aeaeb2;
+            --border-light: #f2f2f7;
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* App Container (Mobile Frame) */
+        #app {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            background: var(--app-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        @media (min-width: 431px) {
+            #app {
+                height: 90vh;
+                border-radius: 48px;
+                border: 10px solid #1a1a1a;
+            }
+        }
+
+        /* Top Header */
+        header {
+            padding: 50px 24px 20px;
+            background: var(--app-bg);
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.8px;
+        }
+
+        /* Screen Content Area */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.98);
+            transition: opacity 0.3s var(--transition-curve), 
+                        transform 0.3s var(--transition-curve),
+                        visibility 0.3s;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* Nav Bar - Premium Blur */
+        nav {
+            height: 84px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px; /* Safe area for home indicator */
+            z-index: 100;
+        }
+
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--inactive-tab);
+            transition: color 0.25s ease, transform 0.1s ease;
+            gap: 4px;
+            min-height: 44px; /* Touch target */
+        }
+
+        .nav-tab:active {
+            transform: scale(0.92);
+        }
+
+        .nav-tab.active {
+            color: var(--active-tab);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-tab.active .nav-icon {
+            transform: translateY(-2px);
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        /* Decorative Element: Home Indicator simulation for desktop */
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 5px;
+            background: #e5e5e5;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        /* Clock Specific Styles */
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding-top: 20px;
+        }
+
+        .time-display {
+            font-size: 64px;
+            font-weight: 500;
+            letter-spacing: -2px;
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .date-display {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .sub-nav {
+            display: flex;
+            background: var(--border-light);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .sub-nav-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .sub-nav-btn.active {
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .clock-module {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .clock-module.active {
+            display: flex;
+        }
+
+        /* Stopwatch & Timer UI */
+        .display-large {
+            font-size: 52px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .btn-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-circle:active {
+            opacity: 0.7;
+        }
+
+        .btn-start { background: #000; color: #fff; }
+        .btn-stop { background: #ff3b30; color: #fff; }
+        .btn-reset { background: var(--border-light); color: var(--text-main); }
+        .btn-lap { background: var(--border-light); color: var(--text-main); }
+
+        .laps-list {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 14px;
+        }
+
+        .timer-inputs {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .timer-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timer-input {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .timer-input:focus {
+            border-color: var(--text-main);
+        }
+
+        .timer-input-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        /* Calculator Specific Styles */
+        .calc-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .calc-display {
+            padding: 12px 0 16px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        #calc-expression {
+            font-size: 16px;
+            color: var(--text-muted);
+            min-height: 22px;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #calc-result {
+            font-size: 72px;
+            font-weight: 600;
+            letter-spacing: -2px;
+            line-height: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-main);
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .calc-btn {
+            height: 66px;
+            border-radius: 33px;
+            border: none;
+            font-size: 22px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calc-btn:active {
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .calc-btn.gray { background: #f2f2f7; color: var(--text-main); }
+        .calc-btn.dark { background: #000; color: #fff; }
+        .calc-btn.operator { background: #000; color: #fff; }
+        .calc-btn.zero { grid-column: span 2; justify-content: flex-start; padding-left: 26px; }
+
+        .calc-history {
+            max-height: 160px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-light);
+            padding-top: 10px;
+        }
+
+        .calc-history-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            text-align: right;
+            transition: background 0.2s;
+        }
+
+        .history-item:active {
+            background: #f9f9f9;
+        }
+
+        .history-exp {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .history-res {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .btn-delete { color: #ff3b30; }
+
+        /* Notes Specific Styles */
+        .notes-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .search-container {
+            padding: 0 0 16px 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--border-light);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .search-input:focus {
+            background: #e5e5ea;
+        }
+
+        .notes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .note-item {
+            padding: 16px;
+            background: var(--app-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .note-item:active {
+            transform: scale(0.98);
+            background: #f9f9f9;
+        }
+
+        .note-item-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .note-item-body {
+            font-size: 14px;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .note-item-date {
+            font-size: 11px;
+            color: var(--inactive-tab);
+            margin-top: 8px;
+        }
+
+        .notes-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .add-note-btn {
+            position: absolute;
+            bottom: 24px;
+            right: 0;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: var(--active-tab);
+            color: #fff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+
+        .add-note-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Note Editor */
+        #note-editor {
+            position: absolute;
+            top: -50px;
+            left: -24px;
+            width: calc(100% + 48px);
+            height: calc(100% + 140px);
+            background: #fff;
+            z-index: 500;
+            display: none;
+            flex-direction: column;
+            padding: 60px 24px 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #note-editor.active {
+            display: flex;
+            transform: translateY(0);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .editor-title-input {
+            font-size: 28px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            width: 100%;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .editor-body-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 17px;
+            line-height: 1.6;
+            resize: none;
+            color: #333;
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .btn-delete { color: #ff3b30; }
+
+        /* Recorder Specific Styles */
+        .recorder-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            padding-top: 8px;
+        }
+
+        .recorder-visualizer {
+            width: 100%;
+            height: 72px;
+            background: #f9f9f9;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #recorder-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .recorder-timer {
+            font-size: 36px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .record-btn-container {
+            margin-bottom: 20px;
+        }
+
+        .record-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+            background: #fff;
+            border: 4px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .record-btn::after {
+            content: '';
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: #ff3b30;
+            transition: all 0.2s;
+        }
+
+        .record-btn.recording {
+            border-color: rgba(255, 59, 48, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+
+        .record-btn.recording::after {
+            border-radius: 4px;
+            transform: scale(0.8);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 59, 48, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+        }
+
+        .recordings-section {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border-top: 1px solid var(--border-light);
+            padding-top: 14px;
+        }
+
+        .recordings-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .recordings-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .recording-card {
+            background: #f2f2f7;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+            border: 1px solid var(--border-light);
+        }
+
+        .recording-card:active {
+            transform: scale(0.98);
+        }
+
+        .recording-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .recording-name {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-main);
+        }
+
+        .recording-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: var(--active-tab);
+            color: #fff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .delete-btn-rec {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 4px;
+            flex-shrink: 0;
+        }
+
+        .storage-warning {
+            font-size: 11px;
+            color: #ff3b30;
+            text-align: center;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        /* Calendar Specific Styles */
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-header {
+            margin-bottom: 16px;
+        }
+
+        .calendar-year-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 6px;
+        }
+
+        .calendar-year-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .calendar-month-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-month-year {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day-name {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:active {
+            background: var(--border-light);
+        }
+
+        .calendar-day.today {
+            background: var(--active-tab);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected:not(.today) {
+            border: 2px solid var(--active-tab);
+        }
+
+        .calendar-day.other-month {
+            color: #d1d1d6;
+        }
+
+        .day-dot {
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background: #ff3b30;
+            border-radius: 2px;
+        }
+
+        .calendar-day.today .day-dot {
+            background: #fff;
+        }
+
+        .events-panel {
+            margin-top: 16px;
+            border-top: 2px solid var(--border-light);
+            padding-top: 16px;
+        }
+
+        #selected-date-label {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text-main);
+        }
+
+        .event-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: stretch;
+        }
+
+        .event-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1.5px solid #d1d1d6;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        .event-input:focus {
+            border-color: var(--text-main);
+        }
+
+        .event-add-btn {
+            padding: 0 20px;
+            background: var(--active-tab);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            min-height: 52px;
+        }
+
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f2f2f7;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-light);
+        }
+
+        .event-item-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .event-delete-btn {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+
+        /* Year/Month Nav Arrows */
+        .nav-arrows {
+            display: flex;
+            gap: 20px;
+        }
+
+        .cal-nav-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .cal-nav-btn:active {
+            background: var(--border-light);
+        }
+
+        .cal-nav-btn.year-skip {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <header>
+            <h1 id="header-title">Clock</h1>
+        </header>
+
+        <main>
+            <!-- Screens -->
+            <section id="screen-clock" class="screen active">
+                <div class="clock-container">
+                    <div id="main-clock-display" class="clock-module active">
+                        <div class="time-display" id="current-time">00:00:00</div>
+                        <div class="date-display" id="current-date">Friday, 8 May 2026</div>
+                    </div>
+
+                    <div id="stopwatch-module" class="clock-module">
+                        <div class="display-large" id="stopwatch-display">00:00.00</div>
+                        <div class="controls">
+                            <button id="sw-reset" class="btn-circle btn-reset" onclick="resetStopwatch()">Reset</button>
+                            <button id="sw-lap" class="btn-circle btn-lap" onclick="addLap()">Lap</button>
+                            <button id="sw-start" class="btn-circle btn-start" onclick="toggleStopwatch()">Start</button>
+                        </div>
+                        <div class="laps-list" id="laps-container"></div>
+                    </div>
+
+                    <div id="timer-module" class="clock-module">
+                        <div class="display-large" id="timer-display" style="display: none;">00:00</div>
+                        <div class="timer-inputs" id="timer-setup">
+                            <div class="timer-input-group">
+                                <input type="number" id="timer-min" class="timer-input" placeholder="00" min="0" max="99">
+                                <span class="timer-input-label">Min</span>
+                            </div>
+                            <span style="font-size: 24px; font-weight: 600; padding-bottom: 15px;">:</span>
+                            <div class="timer-input-group">
+                                <input type="number" id="timer-sec" class="timer-input" placeholder="00" min="0" max="59">
+                                <span class="timer-input-label">Sec</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button id="timer-reset" class="btn-circle btn-reset" onclick="resetTimer()">Reset</button>
+                            <button id="timer-start" class="btn-circle btn-start" onclick="toggleTimer()">Start</button>
+                        </div>
+                    </div>
+
+                    <div class="sub-nav">
+                        <button class="sub-nav-btn active" onclick="switchClockModule('main-clock-display', this)">Clock</button>
+                        <button class="sub-nav-btn" onclick="switchClockModule('stopwatch-module', this)">Stopwatch</button>
+                        <button class="sub-nav-btn" onclick="switchClockModule('timer-module', this)">Timer</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-calendar" class="screen">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="calendar-year-row">
+                            <button class="cal-nav-btn year-skip" onclick="changeYear(-1)" title="Previous year">«« Year</button>
+                            <span class="calendar-year-label" id="year-display">2026</span>
+                            <button class="cal-nav-btn year-skip" onclick="changeYear(1)" title="Next year">Year »»</button>
+                        </div>
+                        <div class="calendar-month-row">
+                            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                            <div class="calendar-month-year" id="month-year-display">May 2026</div>
+                            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar will be injected here -->
+                    </div>
+                    
+                    <div class="events-panel">
+                        <div id="selected-date-label">Today</div>
+                        <div class="event-input-group">
+                            <input type="text" id="event-title-inline" class="event-input" placeholder="Add an event..." onkeydown="if(event.key==='Enter') saveEventInline()">
+                            <button class="event-add-btn" onclick="saveEventInline()">Add</button>
+                        </div>
+                        <div id="events-container-inline"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-notes" class="screen">
+                <div class="notes-container">
+                    <div class="search-container">
+                        <input type="text" id="note-search" class="search-input" placeholder="Search notes..." oninput="renderNotes()">
+                    </div>
+                    <div id="notes-list-container" class="notes-list">
+                        <!-- Notes will be injected here -->
+                    </div>
+                    <button class="add-note-btn" onclick="openNoteEditor()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+                
+                <!-- Note Editor Modal -->
+                <div id="note-editor">
+                    <div class="editor-header">
+                        <button class="btn-text" onclick="closeNoteEditor()">Back</button>
+                        <div style="display: flex; gap: 16px;">
+                            <button id="delete-note-btn" class="btn-text btn-delete" style="display: none;" onclick="deleteNote()">Delete</button>
+                            <button class="btn-text" style="font-weight: 600;" onclick="saveNote()">Save</button>
+                        </div>
+                    </div>
+                    <input type="text" id="note-title" class="editor-title-input" placeholder="Title">
+                    <textarea id="note-body" class="editor-body-input" placeholder="Start typing..."></textarea>
+                </div>
+            </section>
+
+            <section id="screen-calculator" class="screen">
+                <div class="calc-container">
+                    <div class="calc-display">
+                        <div id="calc-expression"></div>
+                        <div id="calc-result">0</div>
+                    </div>
+                    
+                    <div class="calc-grid">
+                        <button class="calc-btn gray" id="calc-clear" onclick="calcClear()">C</button>
+                        <button class="calc-btn gray" onclick="calcToggleSign()">+/-</button>
+                        <button class="calc-btn gray" onclick="calcPercent()">%</button>
+                        <button class="calc-btn operator" onclick="calcOperator('/')">÷</button>
+                        
+                        <button class="calc-btn gray" onclick="calcNumber('7')">7</button>
+                        <button class="calc-btn gray" onclick="calcNumber('8')">8</button>
+                        <button class="calc-btn gray" onclick="calcNumber('9')">9</button>
+                        <button class="calc-btn operator" onclick="calcOperator('*')">×</button>
+                        
+                        <button class="calc-btn gray" onclick="calcNumber('4')">4</button>
+                        <button class="calc-btn gray" onclick="calcNumber('5')">5</button>
+                        <button class="calc-btn gray" onclick="calcNumber('6')">6</button>
+                        <button class="calc-btn operator" onclick="calcOperator('-')">−</button>
+                        
+                        <button class="calc-btn gray" onclick="calcNumber('1')">1</button>
+                        <button class="calc-btn gray" onclick="calcNumber('2')">2</button>
+                        <button class="calc-btn gray" onclick="calcNumber('3')">3</button>
+                        <button class="calc-btn operator" onclick="calcOperator('+')">+</button>
+                        
+                        <button class="calc-btn gray zero" onclick="calcNumber('0')">0</button>
+                        <button class="calc-btn gray" onclick="calcDecimal()">.</button>
+                        <button class="calc-btn operator" onclick="calcEqual()">=</button>
+                    </div>
+
+                    <div class="calc-history">
+                        <div class="calc-history-title">History</div>
+                        <div id="calc-history-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="screen-recorder" class="screen">
+                <div class="recorder-container">
+                    <div class="record-btn-container">
+                        <div class="record-btn" id="record-btn" onclick="toggleRecording()"></div>
+                    </div>
+                    <div class="recorder-timer" id="recorder-time">00:00</div>
+                    <div class="recorder-visualizer">
+                        <canvas id="recorder-canvas"></canvas>
+                    </div>
+                    <div class="recordings-section">
+                        <div id="storage-warning" class="storage-warning">⚠ Storage almost full — delete some recordings.</div>
+                        <div class="recordings-section-title">Saved recordings</div>
+                        <div class="recordings-list">
+                            <div id="recordings-list-container">
+                                <!-- Recordings will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav>
+            <button class="nav-tab active" onclick="showScreen('clock', 'Clock')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                <span class="nav-label">Clock</span>
+            </button>
+            <button class="nav-tab" onclick="showScreen('calendar', 'Calendar')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+                <span class="nav-label">Calendar</span>
+            </button>
+            <button class="nav-tab" onclick="showScreen('notes', 'Notes')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                <span class="nav-label">Notes</span>
+            </button>
+            <button class="nav-tab" onclick="showScreen('calculator', 'Calculator')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M7 12h2v2H7zm0-4h2v2H7zm4 4h2v2h-2zm0-4h2v2h-2zm4 4h2v2h-2zm0-4h2v2h-2zm-8 8h10v2H7z"/></svg>
+                <span class="nav-label">Calculator</span>
+            </button>
+            <button class="nav-tab" onclick="showScreen('recorder', 'Recorder')">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                <span class="nav-label">Recorder</span>
+            </button>
+        </nav>
+        <div class="home-indicator"></div>
+    </div>
+
+    <script>
+        // Core App Logic
+        function showScreen(tabId, title) {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                const label = tab.querySelector('.nav-label').innerText;
+                tab.classList.toggle('active', label === title);
+            });
+
+            document.getElementById('header-title').innerText = title;
+
+            const currentActive = document.querySelector('.screen.active');
+            const nextActive = document.getElementById('screen-' + tabId);
+
+            if (currentActive === nextActive) return;
+
+            currentActive.classList.remove('active');
+            nextActive.classList.add('active');
+            if (window.navigator.vibrate) window.navigator.vibrate(5);
+        }
+
+        // Clock Module Logic
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('current-time').innerText = timeStr;
+            
+            const dateStr = now.toLocaleDateString('en-GB', { 
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+            });
+            document.getElementById('current-date').innerText = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function switchClockModule(moduleId, btn) {
+            document.querySelectorAll('.clock-module').forEach(m => m.classList.remove('active'));
+            document.getElementById(moduleId).classList.add('active');
+            document.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Stopwatch Logic
+        let swInterval;
+        let swStartTime;
+        let swElapsedTime = 0;
+        let swRunning = false;
+
+        function formatTime(ms) {
+            const date = new Date(ms);
+            const mins = date.getUTCMinutes().toString().padStart(2, '0');
+            const secs = date.getUTCSeconds().toString().padStart(2, '0');
+            const centis = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
+            return `${mins}:${secs}.${centis}`;
+        }
+
+        function toggleStopwatch() {
+            const startBtn = document.getElementById('sw-start');
+            if (!swRunning) {
+                swStartTime = Date.now() - swElapsedTime;
+                swInterval = setInterval(() => {
+                    swElapsedTime = Date.now() - swStartTime;
+                    document.getElementById('stopwatch-display').innerText = formatTime(swElapsedTime);
+                }, 10);
+                startBtn.innerText = 'Stop';
+                startBtn.className = 'btn-circle btn-stop';
+                swRunning = true;
+            } else {
+                clearInterval(swInterval);
+                startBtn.innerText = 'Start';
+                startBtn.className = 'btn-circle btn-start';
+                swRunning = false;
+            }
+        }
+
+        function resetStopwatch() {
+            clearInterval(swInterval);
+            swElapsedTime = 0;
+            swRunning = false;
+            document.getElementById('stopwatch-display').innerText = '00:00.00';
+            document.getElementById('sw-start').innerText = 'Start';
+            document.getElementById('sw-start').className = 'btn-circle btn-start';
+            document.getElementById('laps-container').innerHTML = '';
+        }
+
+        function addLap() {
+            if (!swRunning && swElapsedTime === 0) return;
+            const lapTime = formatTime(swElapsedTime);
+            const lapDiv = document.createElement('div');
+            lapDiv.className = 'lap-item';
+            const count = document.querySelectorAll('.lap-item').length + 1;
+            lapDiv.innerHTML = `<span>Lap ${count}</span><span>${lapTime}</span>`;
+            const container = document.getElementById('laps-container');
+            container.insertBefore(lapDiv, container.firstChild);
+        }
+
+        // Timer Logic
+        let timerInterval;
+        let timerSeconds = 0;
+        let timerRunning = false;
+
+        function toggleTimer() {
+            const startBtn = document.getElementById('timer-start');
+            const setup = document.getElementById('timer-setup');
+            const display = document.getElementById('timer-display');
+
+            if (!timerRunning) {
+                if (timerSeconds === 0) {
+                    const mins = parseInt(document.getElementById('timer-min').value) || 0;
+                    const secs = parseInt(document.getElementById('timer-sec').value) || 0;
+                    timerSeconds = (mins * 60) + secs;
+                }
+                
+                if (timerSeconds <= 0) return;
+
+                setup.style.display = 'none';
+                display.style.display = 'block';
+                updateTimerDisplay();
+
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        onTimerEnd();
+                    }
+                }, 1000);
+                
+                startBtn.innerText = 'Pause';
+                startBtn.className = 'btn-circle btn-stop';
+                timerRunning = true;
+            } else {
+                clearInterval(timerInterval);
+                startBtn.innerText = 'Resume';
+                startBtn.className = 'btn-circle btn-start';
+                timerRunning = false;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const s = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            timerRunning = false;
+            document.getElementById('timer-setup').style.display = 'flex';
+            document.getElementById('timer-display').style.display = 'none';
+            document.getElementById('timer-start').innerText = 'Start';
+            document.getElementById('timer-start').className = 'btn-circle btn-start';
+        }
+
+        function onTimerEnd() {
+            if (window.navigator.vibrate) window.navigator.vibrate([500, 200, 500]);
+            // Web Audio Beep
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 1);
+            
+            alert('Timer Finished!');
+            resetTimer();
+        }
+
+        // Calculator Logic
+        let calcCurrentInput = '0';
+        let calcPreviousInput = '';
+        let calcOperatorValue = null;
+        let calcExpression = '';
+        let calcHistory = [];
+        let calcWaitingForNewNumber = false;
+
+        function calcUpdateDisplay() {
+            const resultEl = document.getElementById('calc-result');
+            const expEl = document.getElementById('calc-expression');
+            
+            let displayValue = calcCurrentInput;
+            
+            // Format number with commas and handle errors/length
+            if (displayValue === "Infinity" || displayValue === "-Infinity" || displayValue === "NaN") {
+                displayValue = "Error";
+            } else if (displayValue !== 'Error') {
+                const parts = displayValue.split('.');
+                
+                // Truncate if too long (before formatting)
+                if (parts[0].length > 10) {
+                    displayValue = parseFloat(displayValue).toExponential(4);
+                } else {
+                    parts[0] = parseFloat(parts[0]).toLocaleString('en-US');
+                    displayValue = parts.join('.');
+                }
+            }
+            
+            resultEl.innerText = displayValue;
+            expEl.innerText = calcExpression;
+
+            // Handle C vs CE
+            const clearBtn = document.getElementById('calc-clear');
+            clearBtn.innerText = (calcCurrentInput === '0' && calcPreviousInput === '') ? 'C' : 'CE';
+
+            // Scale font size based on length
+            if (displayValue.length > 10) {
+                resultEl.style.fontSize = '40px';
+            } else if (displayValue.length > 7) {
+                resultEl.style.fontSize = '52px';
+            } else {
+                resultEl.style.fontSize = '72px';
+            }
+        }
+
+        function calcNumber(num) {
+            if (calcWaitingForNewNumber) {
+                calcCurrentInput = num;
+                calcWaitingForNewNumber = false;
+            } else {
+                if (calcCurrentInput.length >= 12) return; // Prevent overflow
+                calcCurrentInput = calcCurrentInput === '0' ? num : calcCurrentInput + num;
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcDecimal() {
+            if (calcWaitingForNewNumber) {
+                calcCurrentInput = '0.';
+                calcWaitingForNewNumber = false;
+            } else if (!calcCurrentInput.includes('.')) {
+                if (calcCurrentInput.length >= 11) return;
+                calcCurrentInput += '.';
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcClear() {
+            if (calcCurrentInput !== '0') {
+                calcCurrentInput = '0';
+            } else {
+                calcPreviousInput = '';
+                calcOperatorValue = null;
+                calcExpression = '';
+            }
+            calcUpdateDisplay();
+        }
+
+        function calcToggleSign() {
+            calcCurrentInput = (parseFloat(calcCurrentInput) * -1).toString();
+            calcUpdateDisplay();
+        }
+
+        function calcPercent() {
+            calcCurrentInput = (parseFloat(calcCurrentInput) / 100).toString();
+            calcUpdateDisplay();
+        }
+
+        function calcOperator(op) {
+            const current = parseFloat(calcCurrentInput);
+            
+            if (calcOperatorValue && !calcWaitingForNewNumber) {
+                calcEqual();
+            }
+            
+            calcPreviousInput = calcCurrentInput;
+            calcOperatorValue = op;
+            calcWaitingForNewNumber = true;
+            
+            const opSymbol = op === '/' ? '÷' : op === '*' ? '×' : op === '-' ? '−' : '+';
+            calcExpression = `${calcPreviousInput} ${opSymbol}`;
+            calcUpdateDisplay();
+        }
+
+        function calcEqual() {
+            if (!calcOperatorValue) return;
+            
+            const prev = parseFloat(calcPreviousInput);
+            const current = parseFloat(calcCurrentInput);
+            let result = 0;
+            
+            switch (calcOperatorValue) {
+                case '+': result = prev + current; break;
+                case '-': result = prev - current; break;
+                case '*': result = prev * current; break;
+                case '/': result = current === 0 ? 'Error' : prev / current; break;
+            }
+            
+            const opSymbol = calcOperatorValue === '/' ? '÷' : calcOperatorValue === '*' ? '×' : calcOperatorValue === '-' ? '−' : '+';
+            const fullExp = `${calcPreviousInput} ${opSymbol} ${calcCurrentInput} =`;
+            
+            addToHistory(fullExp, result);
+            
+            calcCurrentInput = result.toString();
+            calcOperatorValue = null;
+            calcExpression = '';
+            calcWaitingForNewNumber = true;
+            calcUpdateDisplay();
+        }
+
+        function addToHistory(exp, res) {
+            if (res === 'Error') return;
+            calcHistory.unshift({ exp, res });
+            if (calcHistory.length > 10) calcHistory.pop();
+            
+            const listEl = document.getElementById('calc-history-list');
+            listEl.innerHTML = calcHistory.map((item, index) => `
+                <div class="history-item" onclick="restoreHistory(${index})">
+                    <div class="history-exp">${item.exp}</div>
+                    <div class="history-res">${item.res}</div>
+                </div>
+            `).join('');
+        }
+
+        function restoreHistory(index) {
+            calcCurrentInput = calcHistory[index].res.toString();
+            calcWaitingForNewNumber = true;
+            calcUpdateDisplay();
+        }
+
+        // Notes Logic
+        let notes = JSON.parse(localStorage.getItem('app_notes')) || [];
+        let currentNoteIndex = -1;
+
+        function renderNotes() {
+            const container = document.getElementById('notes-list-container');
+            const searchQuery = document.getElementById('note-search').value.toLowerCase();
+            
+            const filteredNotes = notes.filter(note => 
+                (note.title && note.title.toLowerCase().includes(searchQuery)) || 
+                (note.body && note.body.toLowerCase().includes(searchQuery))
+            );
+
+            if (filteredNotes.length === 0) {
+                container.innerHTML = `
+                    <div class="notes-empty">
+                        <div class="placeholder-icon" style="margin-bottom: 10px;">📝</div>
+                        <p>${searchQuery ? 'No matching notes' : 'No notes yet. Tap + to create one.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredNotes.map((note) => {
+                const index = notes.findIndex(n => n.id === note.id);
+                const bodyPreview = note.body ? note.body.split('\n')[0] : 'No body text';
+                return `
+                    <div class="note-item" onclick="openNoteEditor(${index})">
+                        <div class="note-item-title">${note.title || 'Untitled Note'}</div>
+                        <div class="note-item-body">${bodyPreview}</div>
+                        <div class="note-item-date">${new Date(note.date).toLocaleDateString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openNoteEditor(index = -1) {
+            currentNoteIndex = index;
+            const editor = document.getElementById('note-editor');
+            const titleInput = document.getElementById('note-title');
+            const bodyInput = document.getElementById('note-body');
+            const deleteBtn = document.getElementById('delete-note-btn');
+
+            if (index > -1) {
+                titleInput.value = notes[index].title;
+                bodyInput.value = notes[index].body;
+                deleteBtn.style.display = 'block';
+            } else {
+                titleInput.value = '';
+                bodyInput.value = '';
+                deleteBtn.style.display = 'none';
+            }
+
+            editor.style.display = 'flex';
+            setTimeout(() => editor.classList.add('active'), 10);
+        }
+
+        function closeNoteEditor() {
+            const editor = document.getElementById('note-editor');
+            editor.classList.remove('active');
+            setTimeout(() => editor.style.display = 'none', 300);
+        }
+
+        function saveNote() {
+            const titleInput = document.getElementById('note-title');
+            const bodyInput = document.getElementById('note-body');
+            const title = titleInput.value.trim();
+            const body = bodyInput.value.trim();
+
+            if (!title && !body) {
+                closeNoteEditor();
+                return;
+            }
+
+            try {
+                if (currentNoteIndex > -1) {
+                    notes[currentNoteIndex].title = title || 'Untitled Note';
+                    notes[currentNoteIndex].body = body;
+                    notes[currentNoteIndex].date = Date.now();
+                } else {
+                    const newNote = {
+                        id: Date.now(),
+                        title: title || 'Untitled Note',
+                        body: body,
+                        date: Date.now()
+                    };
+                    notes.unshift(newNote);
+                }
+
+                localStorage.setItem('app_notes', JSON.stringify(notes));
+                renderNotes();
+                closeNoteEditor();
+            } catch (e) {
+                alert('Storage is full. Please delete some items.');
+            }
+        }
+
+        function deleteNote() {
+            if (currentNoteIndex > -1) {
+                notes.splice(currentNoteIndex, 1);
+                localStorage.setItem('app_notes', JSON.stringify(notes));
+                renderNotes();
+            }
+            closeNoteEditor();
+        }
+
+        // Initialize
+        renderNotes();
+
+        // Recorder Logic
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordInterval;
+        let recordSeconds = 0;
+        let audioCtx_rec;
+        let analyser;
+        let dataArray;
+        let animationId;
+        let recordings = JSON.parse(localStorage.getItem('app_recordings')) || [];
+        let currentAudio = null;
+        let currentPlayingIndex = -1;
+
+        function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                btn.classList.remove('recording');
+                clearInterval(recordInterval);
+                cancelAnimationFrame(animationId);
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64data = reader.result;
+                        saveRecording(base64data);
+                    };
+                    reader.readAsDataURL(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                document.getElementById('record-btn').classList.add('recording');
+                
+                recordSeconds = 0;
+                updateRecordTimer();
+                recordInterval = setInterval(() => {
+                    recordSeconds++;
+                    updateRecordTimer();
+                }, 1000);
+
+                setupVisualizer(stream);
+            } catch (err) {
+                alert('Microphone access denied or not supported. Please enable permissions in settings.');
+            }
+        }
+
+        function updateRecordTimer() {
+            const m = Math.floor(recordSeconds / 60).toString().padStart(2, '0');
+            const s = (recordSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('recorder-time').innerText = `${m}:${s}`;
+        }
+
+        function setupVisualizer(stream) {
+            audioCtx_rec = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx_rec.createMediaStreamSource(stream);
+            analyser = audioCtx_rec.createAnalyser();
+            analyser.fftSize = 64;
+            source.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            const canvas = document.getElementById('recorder-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function draw() {
+                animationId = requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = '#f9f9f9';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 2;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+                    ctx.fillStyle = '#ff3b30';
+                    ctx.fillRect(x, (canvas.height - barHeight) / 2, barWidth - 2, barHeight);
+                    x += barWidth;
+                }
+            }
+            draw();
+        }
+
+        function saveRecording(data) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const name = `Recording - ${dateStr} ${timeStr}`;
+            
+            const newRecording = {
+                id: Date.now(),
+                name,
+                data,
+                date: now.getTime(),
+                duration: recordSeconds
+            };
+
+            try {
+                recordings.unshift(newRecording);
+                localStorage.setItem('app_recordings', JSON.stringify(recordings));
+                checkStorageUsage();
+                renderRecordings();
+            } catch (e) {
+                alert('LocalStorage is full! Please delete some recordings.');
+                recordings.shift();
+            }
+        }
+
+        function checkStorageUsage() {
+            const used = JSON.stringify(localStorage).length;
+            const limit = 5 * 1024 * 1024; // ~5MB estimate
+            document.getElementById('storage-warning').style.display = (used > limit * 0.8) ? 'block' : 'none';
+        }
+
+        function renderRecordings() {
+            const container = document.getElementById('recordings-list-container');
+            if (recordings.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 20px;">No recordings yet</p>';
+                return;
+            }
+
+            container.innerHTML = recordings.map((rec, index) => `
+                <div class="recording-card">
+                    <div class="recording-info">
+                        <div class="recording-name">${rec.name}</div>
+                        <div class="recording-meta">${new Date(rec.date).toLocaleDateString()} • ${Math.floor(rec.duration/60)}:${(rec.duration%60).toString().padStart(2,'0')}</div>
+                    </div>
+                    <button class="play-btn" id="play-btn-${index}" onclick="playRecording(${index})">
+                        ${currentPlayingIndex === index ? '⏸' : '▶'}
+                    </button>
+                    <button class="delete-btn-rec" onclick="deleteRecording(${index})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function playRecording(index) {
+            if (currentPlayingIndex === index) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                    currentPlayingIndex = -1;
+                    renderRecordings();
+                }
+                return;
+            }
+
+            if (currentAudio) currentAudio.pause();
+
+            currentAudio = new Audio(recordings[index].data);
+            currentPlayingIndex = index;
+            renderRecordings();
+
+            currentAudio.play();
+            currentAudio.onended = () => {
+                currentAudio = null;
+                currentPlayingIndex = -1;
+                renderRecordings();
+            };
+        }
+
+        function deleteRecording(index) {
+            if (currentPlayingIndex === index && currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+                currentPlayingIndex = -1;
+            }
+            recordings.splice(index, 1);
+            localStorage.setItem('app_recordings', JSON.stringify(recordings));
+            renderRecordings();
+            checkStorageUsage();
+        }
+
+        // Initialize Recordings
+        renderRecordings();
+        checkStorageUsage();
+
+        // Calendar Logic
+        let currentViewDate = new Date();
+        let selectedDate = new Date();
+        let events = JSON.parse(localStorage.getItem('app_events')) || {};
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYear = document.getElementById('month-year-display');
+            const yearDisplay = document.getElementById('year-display');
+            
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+            
+            const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+            monthYear.innerText = monthName;
+            if (yearDisplay) yearDisplay.innerText = year;
+            
+            grid.innerHTML = '';
+            ['S','M','T','W','T','F','S'].forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day-name';
+                dayEl.innerText = day;
+                grid.appendChild(dayEl);
+            });
+            
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            
+            // Previous Month Days
+            for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day other-month';
+                dayEl.innerText = daysInPrevMonth - i;
+                grid.appendChild(dayEl);
+            }
+            
+            const today = new Date();
+            
+            // Current Month Days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.innerText = i;
+                
+                const dateKey = `${year}-${month}-${i}`;
+                
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayEl.classList.add('today');
+                }
+                
+                if (i === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                    dayEl.classList.add('selected');
+                }
+                
+                if (events[dateKey] && events[dateKey].length > 0) {
+                    const dot = document.createElement('div');
+                    dot.className = 'day-dot';
+                    dayEl.appendChild(dot);
+                }
+                
+                dayEl.onclick = () => selectDate(i);
+                grid.appendChild(dayEl);
+            }
+
+            // Next Month Days
+            const remainingSlots = 42 - (firstDayOfMonth + daysInMonth); // 6 rows of 7
+            for (let i = 1; i <= remainingSlots; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day other-month';
+                dayEl.innerText = i;
+                grid.appendChild(dayEl);
+            }
+            
+            renderEventsInline();
+        }
+
+        function selectDate(day) {
+            selectedDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth(), day);
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('selected-date-label').innerText = selectedDate.toLocaleDateString('default', options);
+            renderCalendar();
+        }
+
+        function changeMonth(dir) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + dir);
+            renderCalendar();
+        }
+
+        function changeYear(dir) {
+            currentViewDate.setFullYear(currentViewDate.getFullYear() + dir);
+            renderCalendar();
+        }
+
+        function renderEventsInline() {
+            const container = document.getElementById('events-container-inline');
+            const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            const dayEvents = events[dateKey] || [];
+            
+            if (dayEvents.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 14px; text-align: center; margin-top: 20px;">No events for this day</p>';
+                return;
+            }
+            
+            container.innerHTML = dayEvents.map((event, index) => `
+                <div class="event-item">
+                    <span class="event-item-text">${event.title}</span>
+                    <button class="event-delete-btn" onclick="deleteEvent(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function saveEventInline() {
+            const titleInput = document.getElementById('event-title-inline');
+            const title = titleInput.value.trim();
+            
+            if (!title) return;
+            
+            const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            if (!events[dateKey]) events[dateKey] = [];
+            
+            events[dateKey].push({ title });
+            localStorage.setItem('app_events', JSON.stringify(events));
+            
+            titleInput.value = '';
+            renderCalendar();
+        }
+
+        function deleteEvent(index) {
+            const dateKey = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+            events[dateKey].splice(index, 1);
+            if (events[dateKey].length === 0) delete events[dateKey];
+            localStorage.setItem('app_events', JSON.stringify(events));
+            renderCalendar();
+        }
+
+        // Initialize Calendar
+        renderCalendar();
+        selectDate(new Date().getDate());
+    </script>
+</body>
+</html>
