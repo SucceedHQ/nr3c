@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Capacitor](https://img.shields.io/badge/Capacitor-3.0-green.svg)](https://capacitorjs.com)
+
 # NR3C
 
 **Cross-platform mobile utility application.**
